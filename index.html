@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>年度时间进度条</title>
     <style>
-        /* 基础样式 - 移除所有边距和间隙 */
+        /* 基础样式 - 完全去除边距和间隙 */
         html, body {
             margin: 0;
             padding: 0;
@@ -16,7 +16,7 @@
             overflow: hidden;
         }
         
-        /* 主容器 */
+        /* 主容器 - 占满整个空间 */
         .container {
             display: flex;
             flex-direction: column;
@@ -24,41 +24,55 @@
             align-items: center;
             width: 100%;
             height: 100%;
-            background: #1A1A1A; /* 更深的背景色 */
+            background: #1A1A1A;
             color: #FFFFFF;
             box-sizing: border-box;
-            padding: 0;
-            margin: 0;
+            padding: 10px 0; /* 仅保留上下少量内边距 */
         }
         
-        /* 进度条区域 */
+        /* 进度条区域 - 占满宽度 */
         .progress-section {
-            width: 85%;
+            width: 100%;
             margin-bottom: 15px;
+            padding: 0 5px; /* 极小的左右内边距 */
+            box-sizing: border-box;
         }
         
+        /* 进度条外容器 - 带边框的圆角矩形 */
+        .progress-outer {
+            width: 100%;
+            height: 42px; /* 增加高度 */
+            background: transparent;
+            border: 2px solid #CCCCCC; /* 浅灰色边框 */
+            border-radius: 10px; /* 圆角矩形 */
+            padding: 3px; /* 边框与进度条之间的间隔 */
+            box-sizing: border-box;
+        }
+        
+        /* 进度条容器 */
         .progress-container {
             width: 100%;
-            height: 30px;
+            height: 100%;
             background: #2D2D2D;
-            border-radius: 15px;
+            border-radius: 8px; /* 内圆角 */
             overflow: hidden;
             position: relative;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
         
+        /* 进度条 */
         .progress-bar {
             height: 100%;
-            border-radius: 15px;
+            border-radius: 8px;
             background: linear-gradient(90deg, 
-                #0d3b66, /* 深蓝色 */
-                #1a936f, /* 深绿色 */
-                #9e2a2b  /* 深红色 */
+                #0a2a4a, /* 更深的蓝色 */
+                #146b4b, /* 更深的绿色 */
+                #7a1f23  /* 更深的红色 */
             );
             transition: width 0.5s ease;
             position: relative;
         }
         
+        /* 进度百分比数字 */
         .progress-percentage {
             position: absolute;
             top: 50%;
@@ -71,28 +85,95 @@
             white-space: nowrap;
         }
         
-        /* 日期显示区域 */
-        .date-display {
+        /* 日期信息区域 */
+        .date-info {
             text-align: center;
+            width: 100%;
+            padding: 0 5px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        /* 公历日期 - 加粗突出 */
+        .solar-date {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFFFFF;
+        }
+        
+        /* 星期和农历信息 */
+        .lunar-info {
             font-size: 16px;
-            color: #A0A0A0;
+            color: #FFFFFF;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .weekday, .lunar-date {
+            display: inline-block;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="progress-section">
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar">
-                    <div class="progress-percentage" id="progressPercentage"></div>
+            <div class="progress-outer">
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-percentage" id="progressPercentage"></div>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <div class="date-display" id="currentDate"></div>
+        <div class="date-info">
+            <div class="solar-date" id="currentDate"></div>
+            <div class="weekday" id="weekday"></div>
+            <div class="lunar-date" id="lunarDate"></div>
+        </div>
     </div>
 
     <script>
+        // 农历日期转换函数
+        function getLunarDate(date) {
+            // 简化版的农历日期计算
+            // 注意：这是一个简化版本，实际农历计算非常复杂
+            // 这里使用一个近似算法，仅用于演示
+            
+            const lunarMonths = [
+                "正月", "二月", "三月", "四月", "五月", "六月", 
+                "七月", "八月", "九月", "十月", "冬月", "腊月"
+            ];
+            
+            const lunarDays = [
+                "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
+                "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+                "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
+            ];
+            
+            // 简单模拟农历日期（实际应用中应使用专业农历计算库）
+            // 这里使用一个简单的算法，仅用于演示
+            const startDate = new Date(date.getFullYear(), 0, 1);
+            const diffTime = date - startDate;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            const monthIndex = Math.floor(diffDays / 30) % 12;
+            const dayIndex = diffDays % 30;
+            
+            return lunarMonths[monthIndex] + lunarDays[dayIndex];
+        }
+        
+        // 获取星期几的中文名称
+        function getWeekdayName(date) {
+            const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+            return weekdays[date.getDay()];
+        }
+        
         // 计算年度进度
         function calculateYearProgress() {
             const now = new Date();
@@ -132,6 +213,12 @@
             // 更新日期显示
             document.getElementById('currentDate').textContent = formatDate(progressData.date);
             
+            // 更新星期显示
+            document.getElementById('weekday').textContent = getWeekdayName(progressData.date);
+            
+            // 更新农历显示
+            document.getElementById('lunarDate').textContent = "农历" + getLunarDate(progressData.date);
+            
             // 更新进度条和百分比
             const progressBar = document.getElementById('progressBar');
             const progressPercentage = document.getElementById('progressPercentage');
@@ -150,7 +237,7 @@
                 progressPercentage.style.left = "auto";
                 progressPercentage.style.right = "5px";
             } else {
-                progressPercentage.style.left = `${percentagePosition + 5}px`;
+                progressPercentage.style.left = `${Math.max(5, percentagePosition - percentageWidth - 5)}px`;
                 progressPercentage.style.right = "auto";
             }
         }
